@@ -1,1 +1,13 @@
-This is where we ask the user for permissions
+% include('header.tpl')
+
+<div class="container">
+<h1>Instgram Feed Optimizer</h1>
+
+Start by logging in with Instagram
+
+<a href="https://api.instagram.com/oauth/authorize/?client_id={{ client_id }}&redirect_uri={{ redirect_url }}&response_type=code&scope=basic+relationships" class="btn btn-primary">Do it</a>
+
+
+
+</div>
+% include('footer.tpl')

@@ -1,21 +1,11 @@
 import requests
 import sys
 import humanize
+import os
 from datetime import datetime, timedelta, date
-from bottle import route, run, request, template
-
-
-CLIENT_ID="7250583f495e42f1b7828a6c7eacc004"
-user_access_token="1546684.7250583.6b2deff4e7da4bb2b60bfc8778095649"
-
-def refreshPayload():
-	payload = {'client_id':CLIENT_ID, 'access_token': user_access_token}
-
-refreshPayload()
+from bottle import route, run, request, template, redirect, post
 
 session = requests.Session()
-
-followees = []
 
 class Followee:
 	def __init__(self, id, username):
@@ -23,7 +13,7 @@ class Followee:
 		self.user_id = id
 		self.username = username		
 
-	def getRecentMedia(self):
+	def getRecentMedia(self,payload):
 		r = session.get('https://api.instagram.com/v1/users/'+self.user_id+'/media/recent/', params=payload)
 		if r.status_code == 200: # If not, this user is probably visible to followers only
 			for item in r.json()['data']:
@@ -61,68 +51,102 @@ class Followee:
 		return "<Followee %s, %s, %s>"%(str(self.username), str(self.user_id), str(len(self.recent_media)))
 
 	def printData(self):
-		# print "Username: %s"%self.username
 		if len(self.recent_media) != 0:
+			photos_per_day = self.photosPerDay()
+			likes_per_photo = self.likesPerPhoto()
+			time_ago = humanize.naturaltime(datetime.now()-datetime.fromtimestamp(self.recent_media[0]['time']))
 			print self.username,
 			print '\t',
-			print humanize.naturaltime(datetime.now()-datetime.fromtimestamp(self.recent_media[0]['time'])),
+			print time_ago,
 			print '\t',
-			print self.photosPerDay(),
+			print photos_per_day,
 			print '\t',
-			print self.likesPerPhoto()
+			print likes_per_photo
+			return {'username': self.username, 'photos_per_day': photos_per_day, 'likes_per_photo': likes_per_photo, 'last_photo_time': time_ago}
 		else:
 			print self.username
-			# print "No media available for this user"
+			return {'username': self.username}
 
-def main():
-	if len(sys.argv)<2:
-		user_id = input("Enter instagram user ID: ")
-	else:
-		user_id = sys.argv[1]
-	user_info = getUser(user_id)
+
+
+def main(access_token):
+
+	CLIENT_ID=os.environ['CLIENT_ID']
+
+	followees = []
+
+	response = {}
+
+	payload = {'client_id':CLIENT_ID, 'access_token': access_token}
+
+	def getUser():
+		r = session.get('https://api.instagram.com/v1/users/self/', params=payload)
+		return r.json()
+
+	user_info = getUser()
+	
 	print "User name is", user_info['data']['username']
+
+	response['self_user'] = user_info['data']['username']
+
 	print "User has", user_info['data']['counts']['follows'], "followings"
-	self_user = Followee(user_id, user_info['data']['username'])
-	self_user.getRecentMedia()
+
+	response['followings'] = user_info['data']['counts']['follows']
+
+	self_user = Followee(user_info['data']['id'], user_info['data']['username'])
+	self_user.getRecentMedia(payload)
 	self_user.printData()
 
+	def populateFollowings(user_id):
+		paginated = True
+		current_url = 'https://api.instagram.com/v1/users/'+str(user_id)+'/follows'
+		while paginated:
+			r = session.get(current_url, params=payload)
+			for item in r.json()['data']:
+				followees.append(Followee(item['id'], item['username']))
+			if 'next_url' in r.json()['pagination']:
+				current_url = r.json()['pagination']['next_url']
+			else: 
+				paginated = False
+		print len(followees), "Followings found"
+		return True
+
 	print "Getting followings info..."
-	populateFollowings(user_id)
+	populateFollowings(user_info['data']['id'])
 
+	response['users'] = []
 	print "Getting followings media..."
-	for user in followees:
-		user.getRecentMedia()
-		user.printData()
+	for user in followees[:10]:
+		user.getRecentMedia(payload)
+		response['users'].append(user.printData())
 
-def getUser(user_id):
-	r = session.get('https://api.instagram.com/v1/users/'+str(user_id)+'/', params=payload)
-	r = session.get('https://api.instagram.com/v1/users/self/', params=payload)
-	return r.json()
+	return response
 
-def populateFollowings(user_id):
-	paginated = True
-	current_url = 'https://api.instagram.com/v1/users/'+str(user_id)+'/follows'
-	while paginated:
-		r = session.get(current_url, params=payload)
-		for item in r.json()['data']:
-			followees.append(Followee(item['id'], item['username']))
-		if 'next_url' in r.json()['pagination']:
-			current_url = r.json()['pagination']['next_url']
-		else: 
-			paginated = False
-	print len(followees), "Followings found"
-	return True
 
 @route('/')
-def hello():
-	if request.query.get('access_token') is not None:
-		return template('answer.html', access_token=request.query.access_token)
-	return template('before.html')
+def hello():	
+	return template('before.html', redirect_url = os.environ['BASE_URL']+'/results', client_id = os.environ['CLIENT_ID'])
 
-@post('/get_data')
+@route('/results')
+def results():
+	payload = { 
+		'client_id': os.environ['CLIENT_ID'],
+		'client_secret': os.environ['CLIENT_SECRET'],
+		'grant_type': 'authorization_code',
+		'redirect_uri': os.environ['BASE_URL']+'/results',
+		'code': request.query.get('code')
+	}
+
+	r = session.post('https://api.instagram.com/oauth/access_token', data=payload)
+	response = r.json()
+	
+	return template('answer.html', access_token=response['access_token'])
+
+
+@route('/get_data')
 def get_data():
 	if request.query.get('access_token') is not None:
-		return 'Data will be here'
+		return main(request.query.get('access_token'))
 	else:
 		return 'Missing access_token'
 

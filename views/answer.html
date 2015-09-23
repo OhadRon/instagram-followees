@@ -1,2 +1,39 @@
-This is where we provide the answers
-Access token is {{ access_token }}
+% include('header.tpl')
+
+<div class="container">
+	<h1>Instgram Feed Optimizer</h1>
+
+	<div id="loader">
+		Loading data	
+	</div>
+	<div id="result-data">
+	Here's the table with all the data:
+	<table>
+		<tr>
+			<td>Username</td>
+			<td>Likes per photo</td>
+			<td>Last photo time</td>
+			<td>Photos per day</td>
+			<td></td>
+		</tr>
+	</table>
+	</div>
+	<span id="access_token">{{ access_token }}</span>
+	
+
+
+</div>
+
+<script>
+	$(window).load(function(){
+		$('#result-data').hide();
+		var access_token = $('#access_token').text();
+
+		$.get('/get_data?access_token='+access_token,function(data){
+			console.log(data);
+			$('#result-data').show();
+			$('#loader').hide();
+		});
+	});
+</script>
+% include('footer.tpl')
