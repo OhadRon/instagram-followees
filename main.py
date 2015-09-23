@@ -116,7 +116,7 @@ def main(access_token):
 
 	response['users'] = []
 	print "Getting followings media..."
-	for user in followees[:10]:
+	for user in followees:
 		user.getRecentMedia(payload)
 		response['users'].append(user.printData())
 
@@ -139,7 +139,7 @@ def results():
 
 	r = session.post('https://api.instagram.com/oauth/access_token', data=payload)
 	response = r.json()
-	
+
 	return template('answer.html', access_token=response['access_token'])
 
 

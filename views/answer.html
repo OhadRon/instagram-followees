@@ -8,17 +8,23 @@
 	</div>
 	<div id="result-data">
 	Here's the table with all the data:
-	<table>
-		<tr>
-			<td>Username</td>
-			<td>Likes per photo</td>
-			<td>Last photo time</td>
-			<td>Photos per day</td>
-			<td></td>
-		</tr>
+	<table id="tabledata" data-toggle="table" data-sort-name="likes_per_photo" data-sort-order="desc" data-striped="true" data-show-columns="true">
+		<thead>
+			<tr>
+				<th data-field="username" data-sortable="true">Username</th>
+				<th data-field="likes_per_photo" data-sortable="true">Likes per photo</th>
+				<th data-field="last_photo_time" data-sortable="true">Last photo time</th>
+				<th data-field="photos_per_day" data-sortable="true">Photos per day</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody id="table_data">
+			
+		</tbody>
 	</table>
 	</div>
-	<span id="access_token">{{ access_token }}</span>
+	<br>
+	<span id="access_token" style="display: none;">{{ access_token }}</span>
 	
 
 
@@ -31,8 +37,22 @@
 
 		$.get('/get_data?access_token='+access_token,function(data){
 			console.log(data);
+			$('#tabledata').bootstrapTable('load', data.users);
+
+			// for (var i = 0; i < data.users.length; i++) {
+			// 	var newline = ""
+			// 	newline += '<tr>';
+			// 	newline += '<td>'+data.users[i].username+'</td>';
+			// 	newline += '<td>'+data.users[i].like_per_photo+'</td>';
+			// 	newline += '<td>'+data.users[i].last_photo_time+'</td>';
+			// 	newline += '<td>'+data.users[i].photos_per_day+'</td>';
+			// 	newline += '<td></td>';
+			// 	newline += '</tr>';
+			// 	$('table_data').append(newline);
+			// };
 			$('#result-data').show();
 			$('#loader').hide();
+
 		});
 	});
 </script>
