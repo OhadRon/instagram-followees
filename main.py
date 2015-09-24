@@ -1,5 +1,4 @@
 import requests
-import sys
 import humanize
 import os
 from datetime import datetime, timedelta, date
@@ -116,9 +115,17 @@ def main(access_token):
 
 	response['users'] = []
 	print "Getting followings media..."
-	for user in followees:
-		user.getRecentMedia(payload)
-		response['users'].append(user.printData())
+
+	if os.environ['DEBUG_MODE'] == 'TRUE':
+		# Only get the first 5 followees to conserve time
+		print "[DEBUG] Getting only first 5 followees"
+		for user in followees[:5]:
+			user.getRecentMedia(payload)
+			response['users'].append(user.printData())
+	else:
+		for user in followees:
+			user.getRecentMedia(payload)
+			response['users'].append(user.printData())
 
 	return response
 

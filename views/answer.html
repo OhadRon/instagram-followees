@@ -37,19 +37,11 @@
 
 		$.get('/get_data?access_token='+access_token,function(data){
 			console.log(data);
+			for (var i = data.users.length - 1; i >= 0; i--) {
+				var username = data.users[i].username;
+				data.users[i].username = '<a href="http://instagram.com/'+username+'">'+username+'</a>';
+			};
 			$('#tabledata').bootstrapTable('load', data.users);
-
-			// for (var i = 0; i < data.users.length; i++) {
-			// 	var newline = ""
-			// 	newline += '<tr>';
-			// 	newline += '<td>'+data.users[i].username+'</td>';
-			// 	newline += '<td>'+data.users[i].like_per_photo+'</td>';
-			// 	newline += '<td>'+data.users[i].last_photo_time+'</td>';
-			// 	newline += '<td>'+data.users[i].photos_per_day+'</td>';
-			// 	newline += '<td></td>';
-			// 	newline += '</tr>';
-			// 	$('table_data').append(newline);
-			// };
 			$('#result-data').show();
 			$('#loader').hide();
 
