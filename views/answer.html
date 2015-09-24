@@ -4,7 +4,7 @@
 	<h1>Instgram Feed Optimizer</h1>
 
 	<div id="loader">
-		Loading data	
+		Loading data. This could take a while. About a minute for every 100 followings.
 	</div>
 	<div id="result-data">
 	<table id="tabledata" data-toggle="table" data-sort-name="likes_per_photo" data-sort-order="desc" data-striped="true" data-show-columns="true">
@@ -13,7 +13,7 @@
 				<th data-valign="middle" data-align="center" data-field="profile_pic"></th>
 				<th data-valign="middle" data-field="username" data-sortable="true">Username</th>
 				<th data-valign="middle" data-field="likes_per_photo" data-sortable="true">Likes per photo</th>
-				<th data-valign="middle" data-field="last_photo_time" data-sortable="true">Last photo time</th>
+				<th data-valign="middle" data-field="last_photo_time" data-sortable="true" data-sorter="timeSorter">Last photo time</th>
 				<th data-valign="middle" data-field="photos_per_day" data-sortable="true">Photos per day</th>
 				<th data-valign="middle" data-align="center" data-field="unfollow_button"></th>
 			</tr>
@@ -28,6 +28,12 @@
 </div>
 
 <script>
+    function timeSorter(a, b) {
+        if (a > b) return 1;
+        if (a < b) return -1;
+        return 0;
+    }
+
 	$(window).ready(function(){
 		$('#result-data').hide();
 		var access_token = $('#access_token').text();
@@ -38,9 +44,10 @@
 				var username = data.users[i].username;
 				var id = data.users[i].id;
 				var profile_pic = data.users[i].profile_pic;
+				var last_photo_time = data.users[i].last_photo_time;
 				data.users[i].profile_pic = '<img class="profile-pic" src="'+profile_pic+'">';
 				data.users[i].username = '<a target="blank" href="http://instagram.com/'+username+'">'+username+'</a>';
-
+				data.users[i].last_photo_time = '<span data-time="'+last_photo_time+'">'+moment.unix(last_photo_time).fromNow()+'</span>';
 				data.users[i].unfollow_button = '<button type="button" data-userid="'+id+'"class="btn btn-danger unfollow_button">Unfollow</button>';
 			};
 			$('#tabledata').bootstrapTable('load', data.users);

@@ -1,5 +1,4 @@
 import requests
-import humanize
 import os
 from datetime import datetime, timedelta, date
 from bottle import route, run, request, template, redirect, post
@@ -54,15 +53,15 @@ class Followee:
 		if len(self.recent_media) != 0:
 			photos_per_day = self.photosPerDay()
 			likes_per_photo = self.likesPerPhoto()
-			time_ago = humanize.naturaltime(datetime.now()-datetime.fromtimestamp(self.recent_media[0]['time']))
+			photo_time = self.recent_media[0]['time']
 			print self.username,
 			print '\t',
-			print time_ago,
+			print photo_time,
 			print '\t',
 			print photos_per_day,
 			print '\t',
 			print likes_per_photo
-			return {'username': self.username, 'photos_per_day': photos_per_day, 'likes_per_photo': likes_per_photo, 'last_photo_time': time_ago, 'id' : self.user_id, 'profile_pic': self.profile_pic}
+			return {'username': self.username, 'photos_per_day': photos_per_day, 'likes_per_photo': likes_per_photo, 'last_photo_time': photo_time, 'id' : self.user_id, 'profile_pic': self.profile_pic}
 		else:
 			print self.username
 			return {'username': self.username}
