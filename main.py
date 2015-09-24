@@ -1,5 +1,6 @@
 import requests
 import os
+import sys
 from datetime import datetime, timedelta, date
 from bottle import route, run, request, template, redirect, post
 
@@ -185,5 +186,5 @@ def get_data():
 	else:
 		return 'Missing access_token'
 
-run(host='0.0.0.0', port=80, debug=True)
+run(host='0.0.0.0', port=sys.argv[1])
 
