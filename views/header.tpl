@@ -11,6 +11,14 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.8.1/bootstrap-table.min.css">
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.8.1/bootstrap-table.min.js"></script>
-	
+
+	<style>
+	img.profile-pic{
+		border-radius: 100%;
+		width: 40px;
+		height: 40px;
+		margin: 0 auto;
+	}
+	</style>
 </head>
 <body>

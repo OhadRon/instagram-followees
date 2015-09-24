@@ -10,11 +10,12 @@
 	<table id="tabledata" data-toggle="table" data-sort-name="likes_per_photo" data-sort-order="desc" data-striped="true" data-show-columns="true">
 		<thead>
 			<tr>
-				<th data-field="username" data-sortable="true">Username</th>
-				<th data-field="likes_per_photo" data-sortable="true">Likes per photo</th>
-				<th data-field="last_photo_time" data-sortable="true">Last photo time</th>
-				<th data-field="photos_per_day" data-sortable="true">Photos per day</th>
-				<th data-field="unfollow_button"></th>
+				<th data-valign="middle" data-align="center" data-field="profile_pic"></th>
+				<th data-valign="middle" data-field="username" data-sortable="true">Username</th>
+				<th data-valign="middle" data-field="likes_per_photo" data-sortable="true">Likes per photo</th>
+				<th data-valign="middle" data-field="last_photo_time" data-sortable="true">Last photo time</th>
+				<th data-valign="middle" data-field="photos_per_day" data-sortable="true">Photos per day</th>
+				<th data-valign="middle" data-align="center" data-field="unfollow_button"></th>
 			</tr>
 		</thead>
 		<tbody id="table_data">
@@ -36,10 +37,11 @@
 			for (var i = data.users.length - 1; i >= 0; i--) {
 				var username = data.users[i].username;
 				var id = data.users[i].id;
+				var profile_pic = data.users[i].profile_pic;
+				data.users[i].profile_pic = '<img class="profile-pic" src="'+profile_pic+'">';
 				data.users[i].username = '<a target="blank" href="http://instagram.com/'+username+'">'+username+'</a>';
 
-				data.users[i].unfollow_button = '<button type="button" data-userid="'+id+'"class="btn btn-danger unfollow_button">Unfollow</button>'
-
+				data.users[i].unfollow_button = '<button type="button" data-userid="'+id+'"class="btn btn-danger unfollow_button">Unfollow</button>';
 			};
 			$('#tabledata').bootstrapTable('load', data.users);
 			$('#result-data').show();

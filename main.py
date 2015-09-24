@@ -7,10 +7,11 @@ from bottle import route, run, request, template, redirect, post
 session = requests.Session()
 
 class Followee:
-	def __init__(self, id, username):
+	def __init__(self, id, username, profile_pic):
 		self.recent_media = []
 		self.user_id = id
-		self.username = username		
+		self.username = username
+		self.profile_pic = profile_pic
 
 	def getRecentMedia(self,payload):
 		r = session.get('https://api.instagram.com/v1/users/'+self.user_id+'/media/recent/', params=payload)
@@ -61,7 +62,7 @@ class Followee:
 			print photos_per_day,
 			print '\t',
 			print likes_per_photo
-			return {'username': self.username, 'photos_per_day': photos_per_day, 'likes_per_photo': likes_per_photo, 'last_photo_time': time_ago, 'id' : self.user_id}
+			return {'username': self.username, 'photos_per_day': photos_per_day, 'likes_per_photo': likes_per_photo, 'last_photo_time': time_ago, 'id' : self.user_id, 'profile_pic': self.profile_pic}
 		else:
 			print self.username
 			return {'username': self.username}
@@ -92,7 +93,7 @@ def main(access_token):
 
 	response['followings'] = user_info['data']['counts']['follows']
 
-	self_user = Followee(user_info['data']['id'], user_info['data']['username'])
+	self_user = Followee(user_info['data']['id'], user_info['data']['username'], user_info['data']['profile_picture'])
 	self_user.getRecentMedia(payload)
 	self_user.printData()
 
@@ -102,7 +103,7 @@ def main(access_token):
 		while paginated:
 			r = session.get(current_url, params=payload)
 			for item in r.json()['data']:
-				followees.append(Followee(item['id'], item['username']))
+				followees.append(Followee(item['id'], item['username'], item['profile_picture']))
 			if 'next_url' in r.json()['pagination']:
 				current_url = r.json()['pagination']['next_url']
 			else: 
