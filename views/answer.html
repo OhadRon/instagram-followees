@@ -7,7 +7,6 @@
 		Loading data	
 	</div>
 	<div id="result-data">
-	Here's the table with all the data:
 	<table id="tabledata" data-toggle="table" data-sort-name="likes_per_photo" data-sort-order="desc" data-striped="true" data-show-columns="true">
 		<thead>
 			<tr>
@@ -15,7 +14,7 @@
 				<th data-field="likes_per_photo" data-sortable="true">Likes per photo</th>
 				<th data-field="last_photo_time" data-sortable="true">Last photo time</th>
 				<th data-field="photos_per_day" data-sortable="true">Photos per day</th>
-				<th></th>
+				<th data-field="unfollow_button"></th>
 			</tr>
 		</thead>
 		<tbody id="table_data">
@@ -25,13 +24,10 @@
 	</div>
 	<br>
 	<span id="access_token" style="display: none;">{{ access_token }}</span>
-	
-
-
 </div>
 
 <script>
-	$(window).load(function(){
+	$(window).ready(function(){
 		$('#result-data').hide();
 		var access_token = $('#access_token').text();
 
@@ -39,12 +35,33 @@
 			console.log(data);
 			for (var i = data.users.length - 1; i >= 0; i--) {
 				var username = data.users[i].username;
-				data.users[i].username = '<a href="http://instagram.com/'+username+'">'+username+'</a>';
+				var id = data.users[i].id;
+				data.users[i].username = '<a target="blank" href="http://instagram.com/'+username+'">'+username+'</a>';
+
+				data.users[i].unfollow_button = '<button type="button" data-userid="'+id+'"class="btn btn-danger unfollow_button">Unfollow</button>'
+
 			};
 			$('#tabledata').bootstrapTable('load', data.users);
 			$('#result-data').show();
 			$('#loader').hide();
+		});
 
+		$("body").on("click", 'button.unfollow_button.btn-danger', function(e){
+			var user_id = $(this).attr('data-userid');
+			$(this).addClass('btn-primary').removeClass('btn-danger').text('Follow');
+
+			var access_token = $('#access_token').text();
+			$.get('/unfollow?access_token='+access_token+'&user_id='+user_id,function(data){			
+				console.log(data);
+			});
+		});
+
+		$("body").on("click", 'button.unfollow_button.btn-primary', function(e){
+			var user_id = $(this).attr('data-userid');
+			$(this).addClass('btn-danger').removeClass('btn-primary').text('Unfollow');
+			$.get('/follow?access_token='+access_token+'&user_id='+user_id,function(data){			
+				console.log(data);
+			});
 		});
 	});
 </script>

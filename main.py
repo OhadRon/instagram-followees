@@ -61,7 +61,7 @@ class Followee:
 			print photos_per_day,
 			print '\t',
 			print likes_per_photo
-			return {'username': self.username, 'photos_per_day': photos_per_day, 'likes_per_photo': likes_per_photo, 'last_photo_time': time_ago}
+			return {'username': self.username, 'photos_per_day': photos_per_day, 'likes_per_photo': likes_per_photo, 'last_photo_time': time_ago, 'id' : self.user_id}
 		else:
 			print self.username
 			return {'username': self.username}
@@ -136,19 +136,47 @@ def hello():
 
 @route('/results')
 def results():
-	payload = { 
-		'client_id': os.environ['CLIENT_ID'],
-		'client_secret': os.environ['CLIENT_SECRET'],
-		'grant_type': 'authorization_code',
-		'redirect_uri': os.environ['BASE_URL']+'/results',
-		'code': request.query.get('code')
-	}
+	if request.query.get('code') is not None:
+		payload = { 
+			'client_id': os.environ['CLIENT_ID'],
+			'client_secret': os.environ['CLIENT_SECRET'],
+			'grant_type': 'authorization_code',
+			'redirect_uri': os.environ['BASE_URL']+'/results',
+			'code': request.query.get('code'),
+			'scope': 'basic+relationships',
+		}
 
-	r = session.post('https://api.instagram.com/oauth/access_token', data=payload)
-	response = r.json()
+		r = session.post('https://api.instagram.com/oauth/access_token', data=payload)
+		response = r.json()
+		if 'access_token' in response:
+			return template('answer.html', access_token=response['access_token'])
+		else:
+			redirect('/')
+	else:
+		redirect('/')
 
-	return template('answer.html', access_token=response['access_token'])
+@route('/unfollow')
+def unfollow():
+	print "trying to unfollow",request.query.get('user_id')
+	if request.query.get('user_id') is not None and request.query.get('access_token') is not None:
+		payload = { 
+			'access_token': request.query.get('access_token'),
+			'ACTION':'unfollow',
+		}
+		print payload
+		r = session.post('https://api.instagram.com/v1/users/'+request.query.get('user_id')+'/relationship', params=payload)
+		return "Instagram replied:"+str(r.content)
 
+@route('/follow')
+def follow():
+	print "trying to follow",request.query.get('user_id')
+	if request.query.get('user_id') is not None and request.query.get('access_token') is not None:
+		payload = { 
+			'access_token': request.query.get('access_token'),
+			'ACTION':'follow',
+		}
+		r = session.post('https://api.instagram.com/v1/users/'+request.query.get('user_id')+'/relationship', params=payload)
+		return "Instagram replied:"+str(r.content)
 
 @route('/get_data')
 def get_data():
@@ -157,5 +185,5 @@ def get_data():
 	else:
 		return 'Missing access_token'
 
-run(host='localhost', port=8000, debug=True)
+run(host='0.0.0.0', port=80, debug=True)
 
