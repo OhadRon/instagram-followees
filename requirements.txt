@@ -2,7 +2,6 @@ bottle==0.12.8
 cffi==1.2.1
 cryptography==1.0.1
 enum34==1.0.4
-humanize==0.5.1
 idna==2.0
 ipaddress==1.0.14
 ndg-httpsclient==0.4.0
