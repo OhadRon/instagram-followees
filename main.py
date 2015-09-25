@@ -3,6 +3,10 @@ import os
 import sys
 from datetime import datetime, timedelta, date
 from bottle import route, run, request, template, redirect, post
+from rq import Queue
+from worker import conn
+
+q = Queue(connection=conn)
 
 session = requests.Session()
 
@@ -92,10 +96,6 @@ def main(access_token):
 	print "User has", user_info['data']['counts']['follows'], "followings"
 
 	response['followings'] = user_info['data']['counts']['follows']
-
-	self_user = Followee(user_info['data']['id'], user_info['data']['username'], user_info['data']['profile_picture'])
-	self_user.getRecentMedia(payload)
-	self_user.printData()
 
 	def populateFollowings(user_id):
 		paginated = True
