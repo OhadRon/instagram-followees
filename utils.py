@@ -1,7 +1,15 @@
 import requests
+import pickle
 from datetime import datetime, date, timedelta
+from worker import conn
+import os
 
 def getFolloweeData(user_id, client_id, access_token):
+
+	# Try the cache first
+	cache_try = conn.get('ig_cache:'+user_id)
+	if cache_try is not None:
+		return pickle.loads(cache_try)
 
 	results = {}
 
@@ -55,5 +63,8 @@ def getFolloweeData(user_id, client_id, access_token):
 	results['username'] = recent_media[0]['user']
 
 	results['user_id'] = user_id
+
+	conn.set('ig_cache:'+user_id ,pickle.dumps(results))
+	conn.expire('ig_cache:'+user_id, os.environ['CACHE_LIFE'])
 
 	return results
