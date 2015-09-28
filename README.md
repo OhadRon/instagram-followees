@@ -23,3 +23,5 @@ An app to analyse some stats about the people you follow on instagram
 `PORT=` for example `80`
 
 `REDISTOGO_URL=` URL of the Redis server, for example `redis://localhost:6379`
+
+`CACHE_LIFE=` Time (in seconds) to cache user info from the Instagram servers
