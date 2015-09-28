@@ -60,6 +60,8 @@
 			$('#number_of_followings').text(totalFollowings);
 			$('#refreshing').show();
 			jobs_list = data.jobs_list;
+
+			setTimeout(function(){ polling(); }, 2000);	
 		});
 
 		function polling(){
@@ -91,8 +93,6 @@
 				}
 			});			
 		}
-
-		setTimeout(function(){ polling(); }, 2000);	
 
 		$("body").on("click", 'button.unfollow_button.btn-primary', function(e){
 			var user_id = $(this).attr('data-userid');
