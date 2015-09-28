@@ -9,7 +9,9 @@ def getFolloweeData(user_id, client_id, access_token):
 	# Try the cache first
 	cache_try = conn.get('ig_cache:'+user_id)
 	if cache_try is not None:
-		return pickle.loads(cache_try)
+		results = pickle.loads(cache_try)
+		results['from_cache'] = True
+		return results
 
 	results = {}
 
