@@ -115,7 +115,7 @@ def refresh_state():
 				conn.srem(jobs_list, current_job.id)
 
 		# If these are the last jobs:
-		if len(jobs) == 0:
+		if len(jobs) - len(response['results'])  == 0:
 			response['done'] = True
 
 		return response
