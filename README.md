@@ -7,7 +7,8 @@ An app to analyse some stats about the people you follow on instagram
 - Create an Instagram app at https://instagram.com/developer/clients/manage/
 - Create an `.env` file with the required variables
 - Install requirements by `pip install -r requirements.txt`
-- Run the procfile with `heroku local`
+- Run a local Redis server
+- Run the procfile with `heroku local` or `foreman start`
 
 ##Environment variables required:
 
@@ -20,3 +21,5 @@ An app to analyse some stats about the people you follow on instagram
 `DEBUG_MODE=` for example `FALSE` or `TRUE`
 
 `PORT=` for example `80`
+
+`REDISTOGO_URL=` URL of the Redis server, for example `redis://localhost:6379`
