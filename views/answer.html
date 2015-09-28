@@ -4,13 +4,19 @@
 	<h1>Instgram Feed Optimizer</h1>
 
 	<div id="loader">
-		Loading data. This could take a while. About a minute for every 100 followings.
+		Loading data.
+	</div>
+	<div id="refreshing">
+		<p>You have <span id="number_of_followings"></span> followings. Getting their data.</p>
+		<div class="progress">
+			<div id="progress_bar" class="progress-bar progress-bar-striped active" role="progressbar" style="width: 0%;">0</div>
+		</div>
 	</div>
 	<div id="result-data">
 	<table id="tabledata" data-toggle="table" data-sort-name="likes_per_photo" data-sort-order="desc" data-striped="true" data-show-columns="true">
 		<thead>
 			<tr>
-				<th data-valign="middle" data-align="center" data-field="profile_pic"></th>
+				<!-- <th data-valign="middle" data-align="center" data-field="profile_pic"></th> -->
 				<th data-valign="middle" data-field="username" data-sortable="true">Username</th>
 				<th data-valign="middle" data-field="likes_per_photo" data-sortable="true">Likes per photo</th>
 				<th data-valign="middle" data-field="last_photo_time" data-sortable="true" data-sorter="timeSorter">Last photo time</th>
@@ -36,42 +42,56 @@
 
 	$(window).ready(function(){
 		$('#result-data').hide();
+		$('#refreshing').hide();
 		var access_token = $('#access_token').text();
+
+		var jobs_list;
+
+		var totalFollowings = 0;
+		var totalCollected = 0;
+		var collectedData = [];
 
 		$.get('/get_data?access_token='+access_token,function(data){
 			console.log(data);
-			for (var i = data.users.length - 1; i >= 0; i--) {
-				var username = data.users[i].username;
-				var id = data.users[i].id;
-				var profile_pic = data.users[i].profile_pic;
-				var last_photo_time = data.users[i].last_photo_time;
-				data.users[i].profile_pic = '<img class="profile-pic" src="'+profile_pic+'">';
-				data.users[i].username = '<a target="blank" href="http://instagram.com/'+username+'">'+username+'</a>';
-				data.users[i].last_photo_time = '<span data-time="'+last_photo_time+'">'+moment.unix(last_photo_time).fromNow()+'</span>';
-				data.users[i].unfollow_button = '<button type="button" data-userid="'+id+'"class="btn btn-danger unfollow_button">Unfollow</button>';
-			};
-			$('#tabledata').bootstrapTable('load', data.users);
-			$('#result-data').show();
 			$('#loader').hide();
+			totalFollowings = data.followings;
+			$('#number_of_followings').text(totalFollowings);
+			$('#refreshing').show();
+			jobs_list = data.jobs_list;
 		});
 
-		$("body").on("click", 'button.unfollow_button.btn-danger', function(e){
-			var user_id = $(this).attr('data-userid');
-			$(this).addClass('btn-primary').removeClass('btn-danger').text('Follow');
+		function polling(){
+			console.log("Polling...");
+			$.get('/refresh_state?jobs_list='+jobs_list,function(data){
+				totalCollected += data.results.length;
+				collectedData.push.apply(collectedData, data.results);
+				console.log(data, totalCollected+' / '+totalFollowings);
 
-			var access_token = $('#access_token').text();
-			$.get('/unfollow?access_token='+access_token+'&user_id='+user_id,function(data){			
-				console.log(data);
-			});
-		});
+				if (!data.done) {
+					$('#progress_bar').css('width',(totalCollected/totalFollowings*100)+'%');
+					$('#progress_bar').text(totalCollected);
+					setTimeout(function(){ polling(); }, 2000);
+				} else {
+					for (var i = collectedData.length - 1; i >= 0; i--) {
+						var username = collectedData[i].username;
+						var id = collectedData[i].id;
+						// var profile_pic = collectedData[i].profile_pic;
+						var last_photo_time = collectedData[i].last_photo_time;
+						// collectedData[i].profile_pic = '<img class="profile-pic" src="'+profile_pic+'">';
+						collectedData[i].username = '<a target="blank" href="http://instagram.com/'+username+'">'+username+'</a>';
+						collectedData[i].last_photo_time = '<span data-time="'+last_photo_time+'">'+moment.unix(last_photo_time).fromNow()+'</span>';
+						collectedData[i].unfollow_button = '<button type="button" data-userid="'+id+'"class="btn btn-danger unfollow_button">Unfollow</button>';
+					};
+					$('#tabledata').bootstrapTable('load', collectedData);
+					$('#refreshing').hide();
+					$('#result-data').show();
+				}
+			});			
+		}
 
-		$("body").on("click", 'button.unfollow_button.btn-primary', function(e){
-			var user_id = $(this).attr('data-userid');
-			$(this).addClass('btn-danger').removeClass('btn-primary').text('Unfollow');
-			$.get('/follow?access_token='+access_token+'&user_id='+user_id,function(data){			
-				console.log(data);
-			});
-		});
+		setTimeout(function(){ polling(); }, 2000);	
+
 	});
+
 </script>
 % include('footer.tpl')
