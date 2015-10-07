@@ -53,6 +53,8 @@
 		var totalCollected = 0;
 		var collectedData = [];
 
+		mixpanel.track("Contacting Instagram to get user data");
+
 		$.get('/get_data?access_token='+access_token,function(data){
 			console.log(data);
 			$('#loader').hide();
@@ -60,7 +62,7 @@
 			$('#number_of_followings').text(totalFollowings);
 			$('#refreshing').show();
 			jobs_list = data.jobs_list;
-
+			mixpanel.track("Got initial data");
 			setTimeout(function(){ polling(); }, 2000);
 		});
 
@@ -90,11 +92,13 @@
 					$('.fixed-table-toolbar').hide();
 					$('#refreshing').hide();
 					$('#result-data').show();
+					mixpanel.track("Completed process. Showing Data.");
 				}
 			});
 		}
 
 		$("body").on("click", 'button.unfollow_button.btn-primary', function(e){
+			mixpanel.track("Unfollow clicked");
 			var user_id = $(this).attr('data-userid');
 			$(this).addClass('btn-danger').removeClass('btn-primary').text('Unfollow');
 			$.get('/follow?access_token='+access_token+'&user_id='+user_id,function(data){

@@ -19,6 +19,9 @@
 		margin: 0 auto;
 	}
 	</style>
+
+% include('mixpanel.tpl')
+
 </head>
 <body>
 <div class="container">

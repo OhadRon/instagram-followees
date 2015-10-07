@@ -14,8 +14,10 @@ session = requests.Session()
 
 @route('/')
 def start():
+	mixpanel_token = os.getenv('MIXPANEL_TOKEN','')
+
 	if request.query.get('code') is not None:
-		payload = { 
+		payload = {
 			'client_id': os.environ['CLIENT_ID'],
 			'client_secret': os.environ['CLIENT_SECRET'],
 			'grant_type': 'authorization_code',
@@ -27,11 +29,11 @@ def start():
 		r = session.post('https://api.instagram.com/oauth/access_token', data=payload)
 		response = r.json()
 		if 'access_token' in response:
-			return template('answer.html', access_token=response['access_token'])
+			return template('answer.html', access_token=response['access_token'], mixpanel_token=mixpanel_token)
 		else:
-			return template('before.html', redirect_url = os.environ['BASE_URL'], client_id = os.environ['CLIENT_ID'])
+			return template('before.html', redirect_url = os.environ['BASE_URL'], client_id = os.environ['CLIENT_ID'], mixpanel_token=mixpanel_token)
 	else:
-		return template('before.html', redirect_url = os.environ['BASE_URL'], client_id = os.environ['CLIENT_ID'])
+		return template('before.html', redirect_url = os.environ['BASE_URL'], client_id = os.environ['CLIENT_ID'], mixpanel_token=mixpanel_token)
 
 
 @route('/get_data')
@@ -50,7 +52,7 @@ def get_data():
 			return r.json()
 
 		user_info = getUser()
-		
+
 		print "User name is", user_info['data']['username']
 
 		response['self_user'] = user_info['data']['username']
@@ -68,7 +70,7 @@ def get_data():
 					followees.append(item['id'])
 				if 'next_url' in r.json()['pagination']:
 					current_url = r.json()['pagination']['next_url']
-				else: 
+				else:
 					paginated = False
 			print len(followees), "Followings found"
 			return True
@@ -127,7 +129,7 @@ def refresh_state():
 def unfollow():
 	print "trying to unfollow",request.query.get('user_id')
 	if request.query.get('user_id') is not None and request.query.get('access_token') is not None:
-		payload = { 
+		payload = {
 			'access_token': request.query.get('access_token'),
 			'ACTION':'unfollow',
 		}
@@ -139,7 +141,7 @@ def unfollow():
 def follow():
 	print "trying to follow",request.query.get('user_id')
 	if request.query.get('user_id') is not None and request.query.get('access_token') is not None:
-		payload = { 
+		payload = {
 			'access_token': request.query.get('access_token'),
 			'ACTION':'follow',
 		}
