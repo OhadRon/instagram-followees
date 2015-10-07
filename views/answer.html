@@ -1,10 +1,11 @@
 % include('header.tpl')
 
-<div class="container">
 	<h1>Instagram Feed Optimizer</h1>
+	<div style="height:40px;"></div>
 
 	<div id="loader">
 		Loading data.
+		<div style="height:40px;"></div>
 	</div>
 	<div id="refreshing">
 		<p>You have <span id="number_of_followings"></span> followings. Getting their data.</p>
@@ -26,14 +27,13 @@
 				</tr>
 			</thead>
 			<tbody id="table_data">
-				
+
 			</tbody>
 		</table>
 	</p>
 	</div>
 	<br>
 	<span id="access_token" style="display: none;">{{ access_token }}</span>
-</div>
 
 <script>
     function timeSorter(a, b) {
@@ -61,7 +61,7 @@
 			$('#refreshing').show();
 			jobs_list = data.jobs_list;
 
-			setTimeout(function(){ polling(); }, 2000);	
+			setTimeout(function(){ polling(); }, 2000);
 		});
 
 		function polling(){
@@ -91,13 +91,13 @@
 					$('#refreshing').hide();
 					$('#result-data').show();
 				}
-			});			
+			});
 		}
 
 		$("body").on("click", 'button.unfollow_button.btn-primary', function(e){
 			var user_id = $(this).attr('data-userid');
 			$(this).addClass('btn-danger').removeClass('btn-primary').text('Unfollow');
-			$.get('/follow?access_token='+access_token+'&user_id='+user_id,function(data){			
+			$.get('/follow?access_token='+access_token+'&user_id='+user_id,function(data){
 				console.log(data);
 			});
 		});
@@ -105,7 +105,7 @@
 		$("body").on("click", 'button.unfollow_button.btn-danger', function(e){
 			var user_id = $(this).attr('data-userid');
 			$(this).addClass('btn-primary').removeClass('btn-danger').text('Follow');
-			$.get('/unfollow?access_token='+access_token+'&user_id='+user_id,function(data){			
+			$.get('/unfollow?access_token='+access_token+'&user_id='+user_id,function(data){
 				console.log(data);
 			});
 		});
